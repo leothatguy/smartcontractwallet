@@ -1,0 +1,157 @@
+{
+  "preamble": {
+    "title": "leo/smartcontractwallet",
+    "description": "Aiken contracts for project 'leo/smartcontractwallet'",
+    "version": "0.0.0",
+    "plutusVersion": "v3",
+    "compiler": {
+      "name": "Aiken",
+      "version": "v1.1.19+e525483"
+    },
+    "license": "Apache-2.0"
+  },
+  "validators": [
+    {
+      "title": "smart_wallet.smart_wallet.spend",
+      "datum": {
+        "title": "datum",
+        "schema": {
+          "$ref": "#/definitions/smart_wallet~1Datum"
+        }
+      },
+      "redeemer": {
+        "title": "_redeemer",
+        "schema": {
+          "$ref": "#/definitions/smart_wallet~1Redeemer"
+        }
+      },
+      "parameters": [
+        {
+          "title": "owner",
+          "schema": {
+            "$ref": "#/definitions/cardano~1address~1Credential"
+          }
+        }
+      ],
+      "compiledCode": "5901a2010100229800aba2aba1aba0aab9faab9eaab9dab9a488888896600264653001300800198041804800cc0200092225980099b8748008c01cdd500144cc8a6002601a005300d300e002acc004c004c024dd5002c56600260146ea801629345900b4590082444b300159800980218061baa01389919198008009bac301230133013301330133013301330133013300f375401044b30010018a508acc004cdc79bae30130010038a51899801001180a000a01c40446eb8c040c034dd5009c4c8c8cc004004dd5980918099809980998099809980998079baa0082259800800c528456600266ebcc03cc04c004cdd2a4004660246ea400d2f5c114a3133002002301400140388088dd7180818069baa013402d13259800980298069baa0038992cc004c018c038dd5000c4c96600266e1d2002300f37540031337126eb4c04cc040dd50011bad30133010375400314a08070c048c03cdd5180918079baa30123013301330133013301330133013300f375401100240346022601c6ea800e0028060528c528201618041baa002370e90004590060c020004c00cdd5004452689b2b200201",
+      "hash": "240d6905b3cff71b4cae5c1f581aa1a18b22d69082558d09b3c00594"
+    },
+    {
+      "title": "smart_wallet.smart_wallet.else",
+      "redeemer": {
+        "schema": {}
+      },
+      "parameters": [
+        {
+          "title": "owner",
+          "schema": {
+            "$ref": "#/definitions/cardano~1address~1Credential"
+          }
+        }
+      ],
+      "compiledCode": "5901a2010100229800aba2aba1aba0aab9faab9eaab9dab9a488888896600264653001300800198041804800cc0200092225980099b8748008c01cdd500144cc8a6002601a005300d300e002acc004c004c024dd5002c56600260146ea801629345900b4590082444b300159800980218061baa01389919198008009bac301230133013301330133013301330133013300f375401044b30010018a508acc004cdc79bae30130010038a51899801001180a000a01c40446eb8c040c034dd5009c4c8c8cc004004dd5980918099809980998099809980998079baa0082259800800c528456600266ebcc03cc04c004cdd2a4004660246ea400d2f5c114a3133002002301400140388088dd7180818069baa013402d13259800980298069baa0038992cc004c018c038dd5000c4c96600266e1d2002300f37540031337126eb4c04cc040dd50011bad30133010375400314a08070c048c03cdd5180918079baa30123013301330133013301330133013300f375401100240346022601c6ea800e0028060528c528201618041baa002370e90004590060c020004c00cdd5004452689b2b200201",
+      "hash": "240d6905b3cff71b4cae5c1f581aa1a18b22d69082558d09b3c00594"
+    },
+    {
+      "title": "test_simple.test_simple.spend",
+      "datum": {
+        "title": "_datum",
+        "schema": {
+          "$ref": "#/definitions/Data"
+        }
+      },
+      "redeemer": {
+        "title": "_redeemer",
+        "schema": {
+          "$ref": "#/definitions/Data"
+        }
+      },
+      "compiledCode": "585c01010029800aba2aba1aab9eaab9dab9a4888896600264653001300600198031803800cc0180092225980099b8748008c01cdd500144c8cc892898050009805180580098041baa0028b200c180300098019baa0068a4d13656400401",
+      "hash": "d27ccc13fab5b782984a3d1f99353197ca1a81be069941ffc003ee75"
+    },
+    {
+      "title": "test_simple.test_simple.else",
+      "redeemer": {
+        "schema": {}
+      },
+      "compiledCode": "585c01010029800aba2aba1aab9eaab9dab9a4888896600264653001300600198031803800cc0180092225980099b8748008c01cdd500144c8cc892898050009805180580098041baa0028b200c180300098019baa0068a4d13656400401",
+      "hash": "d27ccc13fab5b782984a3d1f99353197ca1a81be069941ffc003ee75"
+    }
+  ],
+  "definitions": {
+    "Data": {
+      "title": "Data",
+      "description": "Any Plutus data."
+    },
+    "Int": {
+      "dataType": "integer"
+    },
+    "aiken/crypto/ScriptHash": {
+      "title": "ScriptHash",
+      "dataType": "bytes"
+    },
+    "aiken/crypto/VerificationKeyHash": {
+      "title": "VerificationKeyHash",
+      "dataType": "bytes"
+    },
+    "cardano/address/Credential": {
+      "title": "Credential",
+      "description": "A general structure for representing an on-chain `Credential`.\n\n Credentials are always one of two kinds: a direct public/private key\n pair, or a script (native or Plutus).",
+      "anyOf": [
+        {
+          "title": "VerificationKey",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "$ref": "#/definitions/aiken~1crypto~1VerificationKeyHash"
+            }
+          ]
+        },
+        {
+          "title": "Script",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": [
+            {
+              "$ref": "#/definitions/aiken~1crypto~1ScriptHash"
+            }
+          ]
+        }
+      ]
+    },
+    "smart_wallet/Datum": {
+      "title": "Datum",
+      "anyOf": [
+        {
+          "title": "Some",
+          "description": "An optional value.",
+          "dataType": "constructor",
+          "index": 0,
+          "fields": [
+            {
+              "$ref": "#/definitions/Int"
+            }
+          ]
+        },
+        {
+          "title": "None",
+          "description": "Nothing.",
+          "dataType": "constructor",
+          "index": 1,
+          "fields": []
+        }
+      ]
+    },
+    "smart_wallet/Redeemer": {
+      "title": "Redeemer",
+      "anyOf": [
+        {
+          "dataType": "constructor",
+          "index": 0,
+          "fields": []
+        }
+      ]
+    }
+  }
+}
