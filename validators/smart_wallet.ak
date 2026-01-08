@@ -3,8 +3,7 @@ use aiken/interval.{Finite}
 use cardano/address.{Credential, Script, VerificationKey}
 use cardano/transaction.{OutputReference, Transaction}
 
-pub type Datum =
-  Option<Int>
+pub type Datum = Int
 
 pub type Redeemer =
   Void
@@ -27,14 +26,13 @@ validator smart_wallet(owner: Credential) {
 
     let is_time_valid =
       when datum is {
-        Some(Some(lock_time)) ->
+       Some(lock_time) ->
           when transaction.validity_range.lower_bound.bound_type is {
             Finite(tx_start_time) -> tx_start_time >= lock_time
             _ -> False
           }
         _ -> True
       }
-
     is_owner_authorized && is_time_valid
   }
 
@@ -55,7 +53,7 @@ test owner_spend_no_datum() {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
-  smart_wallet.spend(owner, Some(None), Void, out_ref, tx)
+  smart_wallet.spend(owner, None, Void, out_ref, tx)
 }
 
 test owner_spend_valid_time() {
@@ -79,7 +77,7 @@ test owner_spend_valid_time() {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
-  smart_wallet.spend(owner, Some(Some(lock_time)), Void, out_ref, tx)
+  smart_wallet.spend(owner, Some(lock_time), Void, out_ref, tx)
 }
 
 test owner_spend_too_early() {
@@ -103,7 +101,7 @@ test owner_spend_too_early() {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
-  !smart_wallet.spend(owner, Some(Some(lock_time)), Void, out_ref, tx)
+  !smart_wallet.spend(owner, Some(lock_time), Void, out_ref, tx)
 }
 
 test non_owner_spend() {
@@ -119,7 +117,7 @@ test non_owner_spend() {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
-  !smart_wallet.spend(owner, Some(None), Void, out_ref, tx)
+  !smart_wallet.spend(owner, None, Void, out_ref, tx)
 }
 
 test script_owner_spend() {
@@ -136,5 +134,5 @@ test script_owner_spend() {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
-  smart_wallet.spend(owner, Some(None), Void, out_ref, tx)
+  smart_wallet.spend(owner, None, Void, out_ref, tx)
 }
