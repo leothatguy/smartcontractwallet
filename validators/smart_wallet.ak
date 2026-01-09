@@ -1,27 +1,33 @@
 use aiken/collection/list
 use aiken/interval.{Finite}
-use cardano/address.{Credential, Script, VerificationKey}
-use cardano/transaction.{OutputReference, Transaction}
+use cardano/address as address
+use cardano/assets
+use cardano/transaction as transaction
 
 pub type Datum = Int
 
 pub type Redeemer =
   Void
 
-validator smart_wallet(owner: Credential) {
+validator smart_wallet(owner: address.Credential) {
   spend(
     datum: Option<Datum>,
     _redeemer: Redeemer,
-    _out_ref: OutputReference,
-    transaction: Transaction,
+    _out_ref: transaction.OutputReference,
+    transaction: transaction.Transaction,
   ) {
+    let transaction.Transaction { inputs, extra_signatories, .. } = transaction
+    
     let is_owner_authorized =
       when owner is {
-        VerificationKey(vk_hash) ->
-          list.has(transaction.extra_signatories, vk_hash)
-        Script(script_hash) ->
-          transaction.withdrawals
-            |> list.any(fn(pair) { pair.1st == Script(script_hash) })
+        address.VerificationKey(vk_hash) ->
+          list.has(extra_signatories, vk_hash)
+        address.Script(script_hash) -> {
+          let auth_cred = address.Script(script_hash)
+          list.any(inputs, fn(input) {
+            input.output.address.payment_credential == auth_cred
+          })
+        }
       }
 
     let is_time_valid =
@@ -43,13 +49,13 @@ validator smart_wallet(owner: Credential) {
 
 test owner_spend_no_datum() {
   let owner =
-    VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
+    address.VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
   let owner_hash = #"00000000000000000000000000000000000000000000000000000000"
   let tx =
     transaction.placeholder
-      |> fn(tx) { Transaction { ..tx, extra_signatories: [owner_hash] } }
+      |> fn(tx) { transaction.Transaction { ..tx, extra_signatories: [owner_hash] } }
   let out_ref =
-    OutputReference {
+    transaction.OutputReference {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
@@ -58,14 +64,14 @@ test owner_spend_no_datum() {
 
 test owner_spend_valid_time() {
   let owner =
-    VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
+    address.VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
   let owner_hash = #"00000000000000000000000000000000000000000000000000000000"
   let lock_time = 1000
   let tx_start = 1001
   let tx =
     transaction.placeholder
       |> fn(tx) {
-          Transaction {
+          transaction.Transaction {
             ..tx,
             extra_signatories: [owner_hash],
             validity_range: interval.after(tx_start),
@@ -73,7 +79,7 @@ test owner_spend_valid_time() {
         }
 
   let out_ref =
-    OutputReference {
+    transaction.OutputReference {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
@@ -82,14 +88,14 @@ test owner_spend_valid_time() {
 
 test owner_spend_too_early() {
   let owner =
-    VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
+    address.VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
   let owner_hash = #"00000000000000000000000000000000000000000000000000000000"
   let lock_time = 2000
   let tx_start = 1000
   let tx =
     transaction.placeholder
       |> fn(tx) {
-          Transaction {
+          transaction.Transaction {
             ..tx,
             extra_signatories: [owner_hash],
             validity_range: interval.after(tx_start),
@@ -97,7 +103,7 @@ test owner_spend_too_early() {
         }
 
   let out_ref =
-    OutputReference {
+    transaction.OutputReference {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
@@ -106,14 +112,14 @@ test owner_spend_too_early() {
 
 test non_owner_spend() {
   let owner =
-    VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
+    address.VerificationKey(#"00000000000000000000000000000000000000000000000000000000")
   let attacker = #"11111111111111111111111111111111111111111111111111111111"
   let tx =
     transaction.placeholder
-      |> fn(tx) { Transaction { ..tx, extra_signatories: [attacker] } }
+      |> fn(tx) { transaction.Transaction { ..tx, extra_signatories: [attacker] } }
 
   let out_ref =
-    OutputReference {
+    transaction.OutputReference {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
@@ -122,15 +128,29 @@ test non_owner_spend() {
 
 test script_owner_spend() {
   let script_hash = #"00000000000000000000000000000000000000000000000000000000"
-  let owner = Script(script_hash)
+  let owner = address.Script(script_hash)
+  let script_address = address.from_script(script_hash)
+  let script_output = transaction.Output {
+    address: script_address,
+    value: assets.zero,
+    datum: transaction.Datum.NoDatum,
+    reference_script: None,
+  }
+  let script_input = transaction.Input {
+    output_reference: transaction.OutputReference {
+      transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
+      output_index: 1,
+    },
+    output: script_output,
+  }
   let tx =
     transaction.placeholder
       |> fn(tx) {
-          Transaction { ..tx, withdrawals: [Pair(Script(script_hash), 0)] }
+          transaction.Transaction { ..tx, inputs: [script_input] }
         }
 
   let out_ref =
-    OutputReference {
+    transaction.OutputReference {
       transaction_id: #"0000000000000000000000000000000000000000000000000000000000000000",
       output_index: 0,
     }
